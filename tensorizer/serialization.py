@@ -3800,13 +3800,14 @@ class TensorSerializer:
             raise ValueError("dtype name length should be less than 256")
         header_pos = self._file.tell() if _start_pos is None else _start_pos
 
-        encrypted: bool = self._encrypted and has_data
+        encrypted: bool = self._encrypted and has_data and tensor_memory.nbytes > 0
         if encrypted:
             chunks = _Chunked(
                 total_size=tensor_memory.nbytes,
                 chunk_size=self._crypt_chunk_size,
             )
             nonces = self._new_nonces(chunks.count)
+
             encryptor = _crypt.ChunkedEncryption(
                 key=self._encryption.key,
                 buffer=tensor_memory,
